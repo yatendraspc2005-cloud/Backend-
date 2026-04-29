@@ -1,0 +1,120 @@
+<%- include('../partials/navbar') %>
+
+  <div class="single-post">
+    <h1 style="margin-bottom: 10px;">
+      <%= post.title %>
+    </h1>
+    <div class="post-meta">
+      By <span>
+        <%= post.author.name %>
+      </span> (<%= post.author.email %>) | <%= new Date(post.createdAt).toLocaleDateString() %>
+    </div>
+
+    <div class="post-actions">
+      <button id="likeBtn" class="btn"
+        style="background: var(--surface-color); border: 1px solid var(--border-color); color: var(--primary-color) !important;">
+        👍 <span id="likeCount">
+          <%= post.likes.length %>
+        </span> Likes
+      </button>
+    </div>
+
+    <div class="single-post-content">
+      <%= post.content %>
+    </div>
+  </div>
+
+  <div class="comments-section">
+    <h3>Comments (<span id="commentCount">
+        <%= post.comments.length %>
+      </span>)</h3>
+
+    <% if (locals.user) { %>
+      <form id="commentForm" style="margin-top: 20px; margin-bottom: 30px;">
+        <div class="form-group">
+          <textarea id="commentText" class="form-control" required placeholder="Add a comment..."></textarea>
+        </div>
+        <button type="submit" class="btn">Post Comment</button>
+      </form>
+      <% } else { %>
+        <p style="margin: 20px 0;"><a href="/login">Log in</a> to leave a comment.</p>
+        <% } %>
+
+          <div id="commentsList">
+            <% post.comments.forEach(comment=> { %>
+              <div class="comment">
+                <div class="comment-meta">
+                  <strong>
+                    <%= comment.user.name %>
+                  </strong> - <%= new Date(comment.date).toLocaleString() %>
+                </div>
+                <div class="comment-text">
+                  <%= comment.text %>
+                </div>
+              </div>
+              <% }) %>
+          </div>
+  </div>
+
+  <%# Hidden element carries server-side values safely into client JS %>
+    <div id="pageData" data-post-id="<%= post._id %>" data-logged-in="<%= locals.user ? 'true' : 'false' %>"
+      style="display:none">
+    </div>
+
+    <script>
+      const pageData = document.getElementById('pageData');
+      const postId = pageData.dataset.postId;
+      const isLoggedIn = pageData.dataset.loggedIn === 'true';
+    </script>
+
+    <script>
+      const likeBtn = document.getElementById('likeBtn');
+      const likeCount = document.getElementById('likeCount');
+
+      if (likeBtn) {
+        likeBtn.addEventListener('click', async () => {
+          if (!isLoggedIn) {
+            window.location.href = '/login';
+            return;
+          }
+
+          try {
+            const res = await fetch(`/api/posts/${postId}/like`, { method: 'PUT' });
+            const data = await res.json();
+
+            if (data.success) {
+              likeCount.textContent = data.data.length;
+            }
+          } catch (err) {
+            console.error(err);
+          }
+        });
+      }
+
+      const commentForm = document.getElementById('commentForm');
+      if (commentForm) {
+        commentForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+
+          const text = document.getElementById('commentText').value;
+
+          try {
+            const res = await fetch(`/api/posts/${postId}/comment`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ text })
+            });
+            const data = await res.json();
+            if (data.success) {
+              window.location.reload();
+            }
+          } catch (err) {
+            console.error(err);
+          }
+        });
+      }
+    </script>
+
+    <%- include('../partials/footer') %>

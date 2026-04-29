@@ -1,0 +1,14 @@
+<%- include('../partials/navbar') %>
+
+<div class="hero">
+  <h1>Welcome to DevConnect</h1>
+  <p>The ultimate blog platform for developers to share knowledge, connect, and grow together.</p>
+  
+  <% if (!locals.user) { %>
+    <a href="/register" class="btn" style="padding: 12px 24px; font-size: 1.1rem;">Get Started Now</a>
+  <% } else { %>
+    <a href="/dashboard" class="btn" style="padding: 12px 24px; font-size: 1.1rem;">Go to Dashboard</a>
+  <% } %>
+</div>
+
+<%- include('../partials/footer') %>

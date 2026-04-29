@@ -1,0 +1,26 @@
+  </div> <!-- end container -->
+  <footer>
+    <div class="container">
+      <p>&copy; 2026 DevConnect Platform. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+    // Global logout logic
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        try {
+          const res = await fetch('/api/auth/logout', { method: 'GET' });
+          if (res.ok) {
+            window.location.href = '/login';
+          }
+        } catch (error) {
+          console.error('Logout failed', error);
+        }
+      });
+    }
+  </script>
+</body>
+</html>
